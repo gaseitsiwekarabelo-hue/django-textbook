@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ book.title }} - My Library</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .book-container {
+            max-width: 650px;
+            margin: 30px auto;
+            padding: 25px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            overflow-wrap: anywhere;
+        }
+
+        p {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        a {
+            color: #0066cc;
+            text-decoration: none;
+            margin-right: 12px;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .actions {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 16px;
+            margin: 5px;
+            background-color: #333;
+            color: white;
+            border-radius: 4px;
+        }
+
+        .button:hover {
+            background-color: #555;
+            text-decoration: none;
+        }
+
+        .available {
+            color: green;
+            font-weight: bold;
+        }
+
+        .unavailable {
+            color: #cc0000;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="book-container">
+
+        <h1>{{ book.title }}</h1>
+
+        <p>
+            <strong>Author:</strong>
+            {{ book.author }}
+        </p>
+
+        <p>
+            <strong>Published Year:</strong>
+            {{ book.published_year }}
+        </p>
+
+        <p>
+            <strong>Genre:</strong>
+            {{ book.genre }}
+        </p>
+
+        <p>
+            <strong>Availability:</strong>
+
+            {% if book.is_available %}
+                <span class="available">Available</span>
+            {% else %}
+                <span class="unavailable">Not Available</span>
+            {% endif %}
+        </p>
+
+        <div class="actions">
+
+            <a href="{% url 'book_list' %}" class="button">
+                Back to Library
+            </a>
+
+            <a href="{% url 'book_update' book.pk %}" class="button">
+                Edit Book
+            </a>
+
+            <a href="{% url 'book_delete' book.pk %}" class="button">
+                Delete Book
+            </a>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

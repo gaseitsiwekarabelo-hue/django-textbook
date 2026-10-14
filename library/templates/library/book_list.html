@@ -3,25 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Library</title>
+
+    <title>My Library - Browse Books</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 40px;
             background-color: #f4f4f4;
+            color: #333;
         }
 
         h1 {
-            color: #333;
+            text-align: center;
+        }
+
+        .top-links,
+        .search-results,
+        .pagination {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .search-form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input,
+        select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        a {
+            color: #0066cc;
+            text-decoration: none;
+            margin-right: 8px;
+        }
+
+        a:hover {
+            text-decoration: underline;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             background-color: white;
+            margin-top: 20px;
         }
 
-        th, td {
+        th,
+        td {
             padding: 12px;
             border: 1px solid #ddd;
             text-align: left;
@@ -31,39 +81,231 @@
             background-color: #333;
             color: white;
         }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .no-books {
+            text-align: center;
+            padding: 20px;
+            background-color: white;
+        }
+
+        .pagination a,
+        .pagination span {
+            display: inline-block;
+            padding: 8px 12px;
+            margin: 3px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .pagination .current {
+            background-color: #333;
+            color: white;
+        }
+
+        .messages {
+            text-align: center;
+            padding: 10px;
+            background-color: #e4f5e8;
+            margin: 15px 0;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                margin: 15px;
+            }
+
+            table {
+                font-size: 13px;
+            }
+
+            th,
+            td {
+                padding: 7px;
+            }
+        }
     </style>
 </head>
+
 <body>
+
     <h1>My Library</h1>
 
-    {% if books %}
-        <table>
-            <tr>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Published Year</th>
-                <th>Genre</th>
-                <th>Available</th>
-            </tr>
+    <div class="top-links">
+        <a href="{% url 'book_create' %}">+ Add New Book</a>
+    </div>
 
-            {% for book in books %}
-                <tr>
-                    <td>{{ book.title }}</td>
-                    <td>{{ book.author }}</td>
-                    <td>{{ book.published_year }}</td>
-                    <td>{{ book.genre }}</td>
-                    <td>
-                        {% if book.is_available %}
-                            Yes
-                        {% else %}
-                            No
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-        </table>
-    {% else %}
-        <p>No books have been added yet.</p>
+    <!-- Display success and error messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="messages">
+                {{ message }}
+            </div>
+        {% endfor %}
     {% endif %}
+
+    <!-- Search, filter, and sort books -->
+    <form method="get" class="search-form">
+
+        <input
+            type="text"
+            name="q"
+            placeholder="Search title, author, or genre"
+            value="{{ query }}"
+        >
+
+        <input
+            type="text"
+            name="genre"
+            placeholder="Filter by genre"
+            value="{{ genre }}"
+        >
+
+        <select name="sort">
+            <option value="title"
+                {% if sort_by == "title" %}selected{% endif %}>
+                Title (A-Z)
+            </option>
+
+            <option value="-title"
+                {% if sort_by == "-title" %}selected{% endif %}>
+                Title (Z-A)
+            </option>
+
+            <option value="-published_year"
+                {% if sort_by == "-published_year" %}selected{% endif %}>
+                Newest First
+            </option>
+
+            <option value="published_year"
+                {% if sort_by == "published_year" %}selected{% endif %}>
+                Oldest First
+            </option>
+        </select>
+
+        <button type="submit">Search</button>
+
+        <a href="{% url 'book_list' %}">Clear Filters</a>
+
+    </form>
+
+    <!-- Display search results -->
+    {% if query or genre %}
+        <p class="search-results">
+            {% if query %}
+                Search: <strong>{{ query }}</strong>
+            {% endif %}
+
+            {% if genre %}
+                | Genre: <strong>{{ genre }}</strong>
+            {% endif %}
+        </p>
+    {% endif %}
+
+    <p>
+        Showing {{ page_obj.start_index }}–{{ page_obj.end_index }}
+        of {{ page_obj.paginator.count }} books.
+    </p>
+
+    <!-- Display books -->
+    {% if books %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Published Year</th>
+                    <th>Genre</th>
+                    <th>Availability</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for book in books %}
+                    <tr>
+                        <td>{{ book.title }}</td>
+                        <td>{{ book.author }}</td>
+                        <td>{{ book.published_year }}</td>
+                        <td>{{ book.genre }}</td>
+
+                        <td>
+                            {% if book.is_available %}
+                                Available
+                            {% else %}
+                                Not Available
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <a href="{% url 'book_detail' book.pk %}">
+                                View
+                            </a>
+
+                            <a href="{% url 'book_update' book.pk %}">
+                                Edit
+                            </a>
+
+                            <a href="{% url 'book_delete' book.pk %}">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    {% else %}
+
+        <div class="no-books">
+            {% if query or genre %}
+                <p>No books match your search or filter.</p>
+            {% else %}
+                <p>No books have been added yet.</p>
+            {% endif %}
+
+            <a href="{% url 'book_create' %}">Add your first book</a>
+        </div>
+
+    {% endif %}
+
+    <!-- Pagination -->
+    {% if page_obj.paginator.num_pages > 1 %}
+
+        <div class="pagination">
+
+            {% if page_obj.has_previous %}
+                <a href="?page=1&q={{ query|urlencode }}&genre={{ genre|urlencode }}&sort={{ sort_by|urlencode }}">
+                    First
+                </a>
+
+                <a href="?page={{ page_obj.previous_page_number }}&q={{ query|urlencode }}&genre={{ genre|urlencode }}&sort={{ sort_by|urlencode }}">
+                    Previous
+                </a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }}
+                of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&q={{ query|urlencode }}&genre={{ genre|urlencode }}&sort={{ sort_by|urlencode }}">
+                    Next
+                </a>
+
+                <a href="?page={{ page_obj.paginator.num_pages }}&q={{ query|urlencode }}&genre={{ genre|urlencode }}&sort={{ sort_by|urlencode }}">
+                    Last
+                </a>
+            {% endif %}
+
+        </div>
+
+    {% endif %}
+
 </body>
 </html>
