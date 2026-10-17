@@ -1,7 +1,6 @@
 from django.http import HttpResponse
 
-
 def home(request):
-    return HttpResponse("Hello World! Welcome to my Django textbook.")
+    return HttpResponse("Welcome to my Library website!")
 
 
