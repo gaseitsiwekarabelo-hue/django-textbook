@@ -1,9 +1,19 @@
-<h1>Delete Book</h1>
-
-<p>Are you sure you want to delete "{{ book.title }}"?</p>
-
-<form method="POST">
-    {% csrf_token %}
-    <button type="submit">Yes, Delete Book</button>
-    <a href="{% url 'book-list' %}">Cancel</a>
-</form>
+{% extends 'base.html' %}
+{% block title %}Delete "{{ book.title }}" - My Library{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow border-danger">
+            <div class="card-body text-center">
+                <h2 class="card-title text-danger mb-3">Delete "{{ book.title }}"?</h2>
+                <p class="text-muted mb-4">This action cannot be undone.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger me-2">Yes, delete this book</button>
+                    <a href="{% url 'library:book-detail' book.pk %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
